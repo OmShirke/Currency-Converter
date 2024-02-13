@@ -1,39 +1,71 @@
+import { useEffect, useState } from "react";
+import CurrencyRows from "./CurrencyRows.js";
 import "./App.css";
-import React, { useEffect, useState } from "react";
-import CurrencyRows from "./CurrencyRows";
 
-const BASE_URL = `https://v6.exchangerate-api.com/v6/6cbbba97b763887effc4b36c/latest/USD`;
+const url = `https://v6.exchangerate-api.com/v6/6cbbba97b763887effc4b36c/latest/USD`;
 
 function App() {
-  const [currencyOptions, setCurrencyOptions] = useState([]);
-  const [fromCurrency, setFromCurrency] = useState();
-  const [toCurrency, setToCurrency] = useState();
+  //# states
+  const [options, setOptions] = useState(["USD", "INR"]);
+  const [firstCurrency, setFirstCurrency] = useState("USD");
+  const [secondCurrency, setSecondCurrency] = useState("INR");
+  const [firstValue, setFirstValue] = useState("1");
+  const [secondValue, setSecondValue] = useState("");
+  const [frontConversion, setFrontConversion] = useState(true);
 
+  //# useEffect
   useEffect(() => {
-    fetch(BASE_URL)
+    fetch(url)
       .then((res) => res.json())
       .then((data) => {
-        const firstCurrency = Object.keys(data.conversion_rates)[0];
-        setCurrencyOptions([data.base, ...Object.keys(data.conversion_rates)]);
-        setFromCurrency(data.base);
-        setToCurrency(firstCurrency);
+        // get rates
+        const CONVERSION_RATES = data.conversion_rates;
+
+        // set available options to the select element
+        setOptions([...Object.keys(CONVERSION_RATES)]);
+
+        // calculate conversion rate
+        const rate =
+          CONVERSION_RATES[secondCurrency] / CONVERSION_RATES[firstCurrency];
+
+        // check conversion direction
+        if (frontConversion) {
+          // update value
+          setSecondValue((firstValue * rate).toFixed(2));
+        } else {
+          setFirstValue((secondValue / rate).toFixed(2));
+        }
       });
-  }, []);
+  }, [firstValue, secondValue, firstCurrency, secondCurrency, frontConversion]);
+
+  // jsx
   return (
-    <>
-      <h1>Convert</h1>
-      <CurrencyRows
-        currencyOptions={currencyOptions}
-        selectedCurrency={fromCurrency}
-        onChangeCurrency={(e) => setFromCurrency(e.target.value)}
-      />
-      <div className="equals">=</div>
-      <CurrencyRows
-        currencyOptions={currencyOptions}
-        selectedCurrency={toCurrency}
-        onChangeCurrency={(e) => setToCurrency(e.target.value)}
-      />
-    </>
+    <main>
+      <h2 className="title">Currency Converter</h2>
+      <header>
+        <div className="container">
+          <CurrencyRows
+            value={firstValue}
+            setValue={setFirstValue}
+            currency={firstCurrency}
+            setCurrency={setFirstCurrency}
+            setFrontConversion={setFrontConversion}
+            conversionValue={true}
+            options={options}
+          />
+
+          <CurrencyRows
+            value={secondValue}
+            setValue={setSecondValue}
+            currency={secondCurrency}
+            setCurrency={setSecondCurrency}
+            setFrontConversion={setFrontConversion}
+            conversionValue={false}
+            options={options}
+          />
+        </div>
+      </header>
+    </main>
   );
 }
 

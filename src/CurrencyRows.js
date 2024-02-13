@@ -1,17 +1,38 @@
 import React from "react";
 
-export default function CurrencyRows(props) {
-  const { currencyOptions, selectedCurrency, onChangeCurrency } = props;
+const CurrencyRows = ({
+  value,
+  setValue,
+  currency,
+  setCurrency,
+  setFrontConversion,
+  conversionValue,
+  options,
+}) => {
+  // jsx
   return (
-    <div>
-      <input type="number" className="input" />
-      <select value={selectedCurrency} onChange={onChangeCurrency}>
-        {currencyOptions.map((option) => (
-          <option key={option} value={option}>
-            {option}
-          </option>
-        ))}
+    <article>
+      {/* input */}
+      <div className="form-row">
+        <input
+          type="number"
+          className="form-input"
+          value={value}
+          onChange={(e) => {
+            setValue(e.target.value);
+            setFrontConversion(conversionValue);
+          }}
+        />
+      </div>
+
+      {/* select-box */}
+      <select value={currency} onChange={(e) => setCurrency(e.target.value)}>
+        {options.map((option, index) => {
+          return <option key={index}>{option}</option>;
+        })}
       </select>
-    </div>
+    </article>
   );
-}
+};
+
+export default CurrencyRows;
